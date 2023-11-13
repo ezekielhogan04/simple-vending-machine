@@ -1,0 +1,154 @@
+import java.util.Scanner;
+
+public class Main {
+
+    private static final int[] DENOMINATIONS = {200, 100, 50, 20, 10, 5, 2, 1};
+    private static final String[] DENOMINATION_NAMES = {"Two pounds", "One pound", "Fifty pennies", "Twenty pennies", "Ten pennies", "Five pennies", "Two pennies", "One penny"};
+
+    public static void main(String[] args) {
+        int currentTotal = 0;
+        boolean quit = false;
+
+        String[] options = {"1: Menu", "2: Select a product", "3: Finish Transaction", "4: Quit"};
+        String[] menu = {
+                "1) Apple: £5.79",
+                "2) Orange: £4.75",
+                "3) Banana: £3.34",
+                "4) Grapes: £2.57",
+                "5) Kiwi: £3.58"
+        };
+
+        Scanner scanner = new Scanner(System.in);
+
+        while (!quit) {
+            // Display the main menu options
+            System.out.println("Please select an option:");
+            for (String option : options) {
+                System.out.println(option);
+            }
+
+            int option;
+            try {
+                // Read user input for option
+                option = scanner.nextInt();
+            } catch (Exception e) {
+                // Handle invalid input (non-integer)
+                System.out.println("Invalid input. Please enter a number.");
+                scanner.nextLine(); // Consume the invalid input
+                continue;
+            }
+
+            switch (option) {
+                case 1:
+                    // Display the product menu
+                    displayMenu(menu);
+                    break;
+                case 2:
+                    // Select a product and update the current total
+                    currentTotal = selectProduct(menu, currentTotal, scanner);
+                    break;
+                case 3:
+                    // Finish the transaction and provide change
+                    handleTransaction(currentTotal, scanner);
+                    currentTotal = 0; // Reset the total after finishing the transaction
+                    break;
+                case 4:
+                    // Quit the program
+                    quit = true;
+                    System.out.println("Thank you, Goodbye");
+                    break;
+                default:
+                    // Handle invalid menu option
+                    System.out.println("Please select a valid option.");
+            }
+        }
+    }
+
+    private static void displayMenu(String[] menu) {
+        // Display the product menu
+        System.out.println("Please select an item:");
+        for (String item : menu) {
+            System.out.println(item);
+        }
+    }
+
+    private static int selectProduct(String[] menu, int currentTotal, Scanner scanner) {
+        // Select a product and update the current total
+        System.out.println("Please select an item from the menu or press 'b' for back:");
+
+        String back = scanner.next();
+
+        if (back.equalsIgnoreCase("b")) {
+            // Go back to the main menu
+            System.out.println("Going back to the main menu...");
+            return currentTotal;
+        }
+
+        try {
+            int item = scanner.nextInt();
+            scanner.nextLine(); // Consume the newline character
+
+            if (item >= 1 && item <= menu.length) {
+                // Update the current total with the selected product price
+                int[] itemPrices = {579, 475, 334, 257, 358};
+                currentTotal += itemPrices[item - 1];
+                System.out.println(menu[item - 1].split(":")[0] + " added to the cart");
+                System.out.println("Your total is: £" + currentTotal / 100.0);
+            } else {
+                // Handle invalid product selection
+                System.out.println("Invalid option, please select a valid item or 'b' to go back.");
+            }
+        } catch (Exception e) {
+            // Handle invalid input (non-integer)
+            System.out.println("Invalid input. Please enter a valid option or 'b' to go back.");
+        }
+
+        return currentTotal;
+    }
+
+    private static void handleTransaction(int currentTotal, Scanner scanner) {
+        // Handle the transaction and provide change
+        if (currentTotal == 0) {
+            // Check if no items are selected
+            System.out.println("No items selected. Please select items before finishing the transaction.");
+            return;
+        }
+
+        float cashAmount = 0.0f;
+        boolean sufficientFunds = false;
+
+        while (!sufficientFunds) {
+            // Prompt user to enter cash amount
+            System.out.println("Enter cash amount: ");
+            try {
+                // Read user input for cash amount
+                cashAmount = scanner.nextFloat();
+            } catch (Exception e) {
+                // Handle invalid input (non-float)
+                System.out.println("Invalid input. Please enter a valid amount.");
+                scanner.nextLine(); // Consume the invalid input
+                continue;
+            }
+
+            float change = cashAmount - currentTotal / 100.0f;
+
+            if (change >= 0) {
+                sufficientFunds = true;
+                // Provide change using denominations
+                for (int i = 0; i < DENOMINATIONS.length; i++) {
+                    int denominationValue = DENOMINATIONS[i];
+                    int count = (int) (change / (denominationValue / 100.0));
+                    if (count > 0) {
+                        System.out.println(DENOMINATION_NAMES[i] + ": " + count);
+                        change %= (denominationValue / 100.0);
+                    }
+                }
+                System.out.println("Transaction complete. Thank you!");
+            } else {
+                // Insufficient funds, prompt user for more money or cancel transaction
+                System.out.println("Insufficient funds. Please enter more money or enter '0' to cancel the transaction.");
+            }
+        }
+    }
+}
+
